@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import { IMAGE_URL } from "@/util/constants";
+
 export default {
   name: "ImageContainer",
   mounted() {
@@ -14,7 +16,7 @@ export default {
       const context = canvas.getContext("2d");
       const image = new Image();
 
-      image.src = "https://picsum.photos/1280/720";
+      image.src = IMAGE_URL;
       image.onload = () => {
         context.drawImage(image, 0, 0);
       };
