@@ -28,5 +28,6 @@ export default {
 <style scoped>
   #canvas {
     border: 1px solid black;
+    cursor: crosshair;
   }
 </style>
