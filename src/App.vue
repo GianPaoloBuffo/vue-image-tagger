@@ -13,10 +13,10 @@
 </template>
 
 <script>
-import ImageContainer from "@/components/ImageContainer";
+import ImageContainer from '@/components/ImageContainer.vue';
 
 export default {
-  name: "App",
-  components: { ImageContainer }
+  name: 'App',
+  components: { ImageContainer },
 };
 </script>

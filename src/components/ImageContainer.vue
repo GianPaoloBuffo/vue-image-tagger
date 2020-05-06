@@ -3,30 +3,30 @@
 </template>
 
 <script>
-import { IMAGE_URL } from "@/util/constants";
+import { IMAGE_URL } from '@/util/constants';
 
 export default {
-  name: "ImageContainer",
+  name: 'ImageContainer',
   mounted() {
     this.loadImage();
   },
   methods: {
     loadImage() {
-      const canvas = document.getElementById("canvas");
-      const context = canvas.getContext("2d");
+      const canvas = document.getElementById('canvas');
+      const context = canvas.getContext('2d');
       const image = new Image();
 
       image.src = IMAGE_URL;
       image.onload = () => {
         context.drawImage(image, 0, 0);
       };
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
-#canvas {
-  border: 1px solid black;
-}
+  #canvas {
+    border: 1px solid black;
+  }
 </style>
