@@ -3,61 +3,98 @@
     id="canvas"
     width="1280"
     height="720"
-    @mousedown="handleMouseDown"
   ></canvas>
 </template>
 
 <script>
+import { fabric } from 'fabric';
+
 import { IMAGE_URL } from '@/util/constants';
 
 export default {
   name: 'ImageContainer',
   data() {
     return {
-      canvas: {
-        context: null,
-        offsetX: 0,
-        offsetY: 0,
-        scrollX: 0,
-        scrollY: 0,
-      },
-      startMouseX: 0,
-      startMouseY: 0,
       isMouseDown: false,
+      startX: 0,
+      startY: 0,
     };
   },
   mounted() {
     this.initCanvas();
-    this.loadImage();
   },
   methods: {
     initCanvas() {
-      const canvas = document.getElementById('canvas');
+      const canvas = new fabric.Canvas('canvas');
+      canvas.setBackgroundImage(IMAGE_URL, canvas.renderAll.bind(canvas));
 
-      this.canvas.context = canvas.getContext('2d');
-      this.canvas.offsetX = canvas.offsetLeft;
-      this.canvas.offsetY = canvas.offsetTop;
-      this.canvas.scrollX = canvas.scrollLeft;
-      this.canvas.scrollY = canvas.scrollTop;
+      this.addMouseDownHandler(canvas);
+      this.addMouseMoveHandler(canvas);
+      this.addMouseUpHandler(canvas);
+      this.addObjectMoveHandler(canvas);
     },
-    loadImage() {
-      const image = new Image();
-      image.src = IMAGE_URL;
-      image.onload = () => {
-        this.canvas.context.drawImage(image, 0, 0);
-      };
+    addMouseDownHandler(canvas) {
+      canvas.on('mouse:down', (options) => {
+        this.isMouseDown = true;
+
+        const pointer = canvas.getPointer(options.e);
+        this.startX = pointer.x;
+        this.startY = pointer.y;
+
+        const rectangle = new fabric.Rect({
+          left: this.startX,
+          top: this.startY,
+          originX: 'left',
+          originY: 'top',
+          width: pointer.x - this.startX,
+          height: pointer.y - this.startY,
+          angle: 0,
+          hasBorders: false,
+          hasControls: false,
+          transparentCorners: false,
+        });
+
+        canvas.add(rectangle).setActiveObject(rectangle);
+      });
     },
-    handleMouseDown() {
-      // this.startMouseX = parseInt(event.clientX - offsetX);
-      // startY=parseInt(e.clientY-offsetY);
+    addMouseMoveHandler(canvas) {
+      canvas.on('mouse:move', (options) => {
+        if (!this.isMouseDown) {
+          return;
+        }
+
+        const pointer = canvas.getPointer(options.e);
+        const rectangle = canvas.getActiveObject();
+
+        rectangle.stroke = 'red';
+        rectangle.strokeWidth = 5;
+        rectangle.fill = 'transparent';
+
+        if (this.startX > pointer.x) {
+          rectangle.set({ left: Math.abs(pointer.x) });
+        }
+
+        if (this.startY > pointer.y) {
+          rectangle.set({ top: Math.abs(pointer.y) });
+        }
+
+        rectangle.set({ width: Math.abs(this.startX - pointer.x) });
+        rectangle.set({ height: Math.abs(this.startY - pointer.y) });
+
+        rectangle.setCoords();
+        canvas.renderAll();
+      });
+    },
+    addMouseUpHandler(canvas) {
+      canvas.on('mouse:up', () => {
+        this.isMouseDown = false;
+      });
+    },
+    addObjectMoveHandler(canvas) {
+      canvas.on('object:moving', () => {
+        this.isMouseDown = false;
+      });
     },
   },
 };
 </script>
-
-<style scoped>
-  #canvas {
-    border: 1px solid black;
-    cursor: crosshair;
-  }
-</style>
