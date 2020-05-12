@@ -9,12 +9,15 @@
 <script>
 import { fabric } from 'fabric';
 
+import { loadBoundingBoxes } from '@/api/api';
+
 import { IMAGE_URL } from '@/util/constants';
 
 export default {
   name: 'ImageContainer',
   data() {
     return {
+      boundingBoxes: [],
       isMouseDown: false,
       startX: 0,
       startY: 0,
@@ -22,6 +25,7 @@ export default {
   },
   mounted() {
     this.initCanvas();
+    this.loadBoundingBoxes();
   },
   methods: {
     initCanvas() {
@@ -32,6 +36,9 @@ export default {
       this.addMouseMoveHandler(canvas);
       this.addMouseUpHandler(canvas);
       this.addObjectMoveHandler(canvas);
+    },
+    loadBoundingBoxes() {
+      this.boundingBoxes = loadBoundingBoxes();
     },
     addMouseDownHandler(canvas) {
       canvas.on('mouse:down', (options) => {
@@ -88,12 +95,29 @@ export default {
     addMouseUpHandler(canvas) {
       canvas.on('mouse:up', () => {
         this.isMouseDown = false;
+
+        const rectangle = canvas.getActiveObject();
+        if (rectangle.height && rectangle.width) {
+          const boundingBox = this.constructBoundingBox(rectangle);
+          this.boundingBoxes.push(boundingBox);
+          this.$emit('select', boundingBox);
+        }
+
+        console.log(this.boundingBoxes);
       });
     },
     addObjectMoveHandler(canvas) {
       canvas.on('object:moving', () => {
         this.isMouseDown = false;
       });
+    },
+    constructBoundingBox(rectangle) {
+      return {
+        top: rectangle.top,
+        left: rectangle.left,
+        height: rectangle.height,
+        width: rectangle.width,
+      };
     },
   },
 };
