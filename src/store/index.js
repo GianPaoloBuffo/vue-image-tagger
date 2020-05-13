@@ -11,20 +11,10 @@ const filterBoundingBoxes = (boundingBoxes, deletedBoundingBox) => boundingBoxes
   (box) => box.id !== deletedBoundingBox.id,
 );
 
-const dummyTags = [{ id: 1, text: 'dog' }];
-
-const dummyBoundingBoxes = [{
-  id: 1,
-  top: 100,
-  left: 100,
-  height: 50,
-  width: 50,
-}];
-
 export default new Vuex.Store({
   state: {
-    tags: dummyTags,
-    boundingBoxes: dummyBoundingBoxes,
+    tags: [],
+    boundingBoxes: [],
   },
   mutations: {
     setTags(state, tags) {
