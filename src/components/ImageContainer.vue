@@ -21,9 +21,9 @@ export default {
       startY: 0,
     };
   },
-  mounted() {
+  async mounted() {
+    await this.loadBoundingBoxes();
     this.initCanvas();
-    this.loadBoundingBoxes();
   },
   methods: {
     initCanvas() {
@@ -34,6 +34,8 @@ export default {
       this.addMouseMoveHandler(canvas);
       this.addMouseUpHandler(canvas);
       this.addObjectMoveHandler(canvas);
+
+      this.drawExistingBoundingBoxes(canvas);
     },
     async loadBoundingBoxes() {
       this.boundingBoxes = await this.$store.dispatch('loadBoundingBoxes');
@@ -114,6 +116,27 @@ export default {
         height: rectangle.height,
         width: rectangle.width,
       };
+    },
+    drawExistingBoundingBoxes(canvas) {
+      // TODO: Reduce duplication and draw with correct stroke and fill
+      this.boundingBoxes.forEach((box) => {
+        const rectangle = new fabric.Rect({
+          left: box.left,
+          top: box.top,
+          originX: 'left',
+          originY: 'top',
+          width: box.width,
+          height: box.height,
+          angle: 0,
+          hasBorders: false,
+          hasControls: false,
+          transparentCorners: false,
+        });
+
+        canvas.add(rectangle);
+      });
+
+      canvas.renderAll();
     },
   },
 };
