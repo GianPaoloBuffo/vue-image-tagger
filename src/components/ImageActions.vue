@@ -7,8 +7,6 @@
 </template>
 
 <script>
-import { deleteBoundingBox, loadTags, saveBoundingBox } from '@/api/api';
-
 export default {
   name: 'ImageActions',
   props: {
@@ -27,14 +25,15 @@ export default {
     this.loadTags();
   },
   methods: {
-    loadTags() {
-      this.tags = loadTags();
+    async loadTags() {
+      this.tags = await this.$store.dispatch('loadTags');
     },
     save() {
-      saveBoundingBox(this.box, this.selectedTag);
+      const payload = { boundingBox: this.box, tag: this.selectedTag };
+      this.$store.dispatch('saveBoundingBox', payload);
     },
     remove() {
-      deleteBoundingBox(this.box);
+      this.$store.dispatch('deleteBoundingBox', this.box);
     },
   },
 };

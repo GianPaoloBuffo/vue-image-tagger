@@ -9,8 +9,6 @@
 <script>
 import { fabric } from 'fabric';
 
-import { loadBoundingBoxes } from '@/api/api';
-
 import { IMAGE_URL } from '@/util/constants';
 
 export default {
@@ -37,8 +35,8 @@ export default {
       this.addMouseUpHandler(canvas);
       this.addObjectMoveHandler(canvas);
     },
-    loadBoundingBoxes() {
-      this.boundingBoxes = loadBoundingBoxes();
+    async loadBoundingBoxes() {
+      this.boundingBoxes = await this.$store.dispatch('loadBoundingBoxes');
     },
     addMouseDownHandler(canvas) {
       canvas.on('mouse:down', (options) => {
@@ -102,8 +100,6 @@ export default {
           this.boundingBoxes.push(boundingBox);
           this.$emit('select', boundingBox);
         }
-
-        console.log(this.boundingBoxes);
       });
     },
     addObjectMoveHandler(canvas) {
