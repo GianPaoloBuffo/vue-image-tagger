@@ -43,25 +43,21 @@ export default {
     addMouseDownHandler(canvas) {
       canvas.on('mouse:down', (options) => {
         this.isMouseDown = true;
+        this.$emit('select', null);
 
         const pointer = canvas.getPointer(options.e);
         this.startX = pointer.x;
         this.startY = pointer.y;
 
-        const rectangle = new fabric.Rect({
-          left: this.startX,
+        const rectangle = this.createRectangle({
+          canvas,
           top: this.startY,
-          originX: 'left',
-          originY: 'top',
+          left: this.startX,
           width: pointer.x - this.startX,
           height: pointer.y - this.startY,
-          angle: 0,
-          hasBorders: false,
-          hasControls: false,
-          transparentCorners: false,
         });
 
-        canvas.add(rectangle).setActiveObject(rectangle);
+        canvas.setActiveObject(rectangle);
       });
     },
     addMouseMoveHandler(canvas) {
@@ -72,10 +68,6 @@ export default {
 
         const pointer = canvas.getPointer(options.e);
         const rectangle = canvas.getActiveObject();
-
-        rectangle.stroke = 'red';
-        rectangle.strokeWidth = 5;
-        rectangle.fill = 'transparent';
 
         if (this.startX > pointer.x) {
           rectangle.set({ left: Math.abs(pointer.x) });
@@ -118,25 +110,51 @@ export default {
       };
     },
     drawExistingBoundingBoxes(canvas) {
-      // TODO: Reduce duplication and draw with correct stroke and fill
       this.boundingBoxes.forEach((box) => {
-        const rectangle = new fabric.Rect({
-          left: box.left,
+        this.createRectangle({
+          canvas,
           top: box.top,
-          originX: 'left',
-          originY: 'top',
+          left: box.left,
           width: box.width,
           height: box.height,
-          angle: 0,
-          hasBorders: false,
-          hasControls: false,
-          transparentCorners: false,
         });
-
-        canvas.add(rectangle);
       });
 
       canvas.renderAll();
+    },
+    createRectangle({
+      canvas, top, left, width, height,
+    }) {
+      const rectangle = new fabric.Rect({
+        top,
+        left,
+        width,
+        height,
+        originX: 'left',
+        originY: 'top',
+        angle: 0,
+        hasBorders: false,
+        hasControls: false,
+        transparentCorners: false,
+      });
+
+      rectangle.stroke = 'red';
+      rectangle.strokeWidth = 5;
+      rectangle.fill = 'transparent';
+
+      canvas.add(rectangle);
+
+      rectangle.on('mousedown', () => {
+        canvas.setActiveObject(rectangle);
+        rectangle.set({ stroke: 'green' });
+        this.$emit('select', rectangle);
+      });
+
+      rectangle.on('deselected', () => {
+        rectangle.set({ stroke: 'red' });
+      });
+
+      return rectangle;
     },
   },
 };
