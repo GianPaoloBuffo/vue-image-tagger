@@ -150,8 +150,11 @@ export default {
 
       rectangle.on('mousedown', () => {
         canvas.setActiveObject(rectangle);
-        rectangle.set({ stroke: 'green' });
         this.$emit('select', rectangle);
+      });
+
+      rectangle.on('selected', () => {
+        rectangle.set({ stroke: 'green' });
       });
 
       rectangle.on('deselected', () => {
