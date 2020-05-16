@@ -1,9 +1,13 @@
 <template>
-  <canvas
-    id="canvas"
-    width="1280"
-    height="720"
-  ></canvas>
+  <v-row>
+    <v-col cols="12" align="center">
+      <canvas
+        id="canvas"
+        width="1280"
+        height="720"
+      ></canvas>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
