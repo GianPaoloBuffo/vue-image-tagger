@@ -8,12 +8,8 @@ export const loadBoundingBoxes = () => [{
   width: 50,
 }];
 
-export const saveBoundingBox = (boundingBox, tag) => {
-  console.log(boundingBox, tag);
-};
+export const saveBoundingBox = (boundingBox, tag) => ({ ...boundingBox, tag });
 
-export const deleteBoundingBox = (boundingBox) => {
-  console.log(boundingBox);
-};
+export const deleteBoundingBox = (boundingBox) => boundingBox;
 
 export default {};
