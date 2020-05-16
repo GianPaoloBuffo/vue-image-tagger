@@ -1,0 +1,15 @@
+{
+  "name": "vue-image-tagger-server",
+  "version": "0.1.0",
+  "description": "Server for application CRUD",
+  "private": true,
+  "main": "server.js",
+  "author": "GP Buffo",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "sequelize": "^5.21.9",
+    "sqlite3": "^4.2.0"
+  }
+}
