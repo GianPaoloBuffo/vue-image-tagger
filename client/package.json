@@ -1,7 +1,9 @@
 {
-  "name": "vue-image-tagger",
+  "name": "vue-image-tagger-client",
   "version": "0.1.0",
+  "description": "Client for application UI",
   "private": true,
+  "author": "GP Buffo",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
