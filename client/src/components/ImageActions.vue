@@ -33,6 +33,7 @@ export default {
       this.$store.dispatch('saveBoundingBox', payload);
     },
     remove() {
+      // TODO: If not already saved, should just remove from canvas?
       this.$store.dispatch('deleteBoundingBox', this.box);
     },
   },
