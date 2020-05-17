@@ -7,9 +7,8 @@ db.sequelize.sync();
 
 const app = express();
 
-// TODO: Do I need CORS?
 const corsOptions = {
-    origin: 'http://localhost:8082',
+    origin: 'http://localhost:8080',
 };
 
 app.use(cors(corsOptions));
