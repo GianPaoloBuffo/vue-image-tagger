@@ -1,29 +1,17 @@
-# vue-image-tagger
+# Vue Image Tagger
 
-## Project setup
-```
-npm install
-```
+Proof-of-concept for an image tagger made in Vue with a Node backend.
 
-### Compiles and hot-reloads for development
+### Start Client
+Default Port: 8080
 ```
+cd client
 npm run serve
 ```
 
-### Compiles and minifies for production
+### Start Server
+Default Port: 8081
 ```
-npm run build
-```
-
-### Run your unit tests
-```
-npm run test:unit
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+cd server
+node server.js
+``` 
