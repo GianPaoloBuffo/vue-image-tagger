@@ -2,8 +2,7 @@ const config = require('../config/db.config');
 
 const { Sequelize } = require('sequelize');
 
-// TODO: This might be enough, then don't need config
-const sequelize = new Sequelize(config.DB.PROVIDER)
+const sequelize = new Sequelize(config.DB)
 
 const db = {};
 
