@@ -35,7 +35,6 @@ describe('ImageActions.vue', () => {
       initialTags: [allTags[0]],
     });
 
-
     // eslint-disable-next-line no-undef
     expect(wrapper.vm.selectableTags).toEqual(allTags);
   });
