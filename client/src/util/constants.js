@@ -1,3 +1,6 @@
-export const IMAGE_URL = 'https://picsum.photos/id/1025/1280/720';
+export const COLOR = {
+  SELECTED: '#54B258',
+  DESELECTED: '#1976D2',
+};
 
 export default {};
