@@ -1,6 +1,10 @@
 <template>
   <v-row>
-    <v-col cols="12" align="center">
+    <v-col
+      cols="12"
+      align="center"
+      class="pt-0 pb-0"
+    >
       <canvas
         id="canvas"
         width="1280"
@@ -13,7 +17,10 @@
 <script>
 import { fabric } from 'fabric';
 
-import { IMAGE_URL } from '@/util/constants';
+import eventBus from '@/store/eventBus';
+import { COLOR } from '@/util/constants';
+import canvasImage from '@/assets/pug-to-tag.jpg';
+import { loadBoundingBoxes } from '@/api/api';
 
 export default {
   name: 'ImageContainer',
@@ -32,37 +39,51 @@ export default {
   methods: {
     initCanvas() {
       const canvas = new fabric.Canvas('canvas');
-      canvas.setBackgroundImage(IMAGE_URL, canvas.renderAll.bind(canvas));
+      canvas.setBackgroundImage(canvasImage, canvas.renderAll.bind(canvas));
 
       this.addMouseDownHandler(canvas);
       this.addMouseMoveHandler(canvas);
       this.addMouseUpHandler(canvas);
       this.addObjectMoveHandler(canvas);
 
+      this.addDeleteEventHandler(canvas);
+      this.addSaveEventHandler(canvas);
+
       this.drawExistingBoundingBoxes(canvas);
     },
     async loadBoundingBoxes() {
-      this.boundingBoxes = await this.$store.dispatch('loadBoundingBoxes');
+      this.boundingBoxes = await loadBoundingBoxes();
     },
     addMouseDownHandler(canvas) {
       canvas.on('mouse:down', (options) => {
+        const pointer = canvas.getPointer(options.e);
+        const activeRectangle = this.getActiveRectangle(canvas, pointer);
+
         this.isMouseDown = true;
         this.$emit('select', null);
 
-        const pointer = canvas.getPointer(options.e);
-        this.startX = pointer.x;
-        this.startY = pointer.y;
-
-        const rectangle = this.createRectangle({
-          canvas,
-          top: this.startY,
-          left: this.startX,
-          width: pointer.x - this.startX,
-          height: pointer.y - this.startY,
-        });
-
-        canvas.setActiveObject(rectangle);
+        canvas.setActiveObject(activeRectangle);
       });
+    },
+    getActiveRectangle(canvas, pointer) {
+      const rectangle = canvas.getActiveObject();
+
+      this.startX = pointer.x;
+      this.startY = pointer.y;
+
+      if (rectangle) {
+        return rectangle;
+      }
+
+      const boundingBox = {
+        top: this.startY,
+        left: this.startX,
+        width: pointer.x - this.startX,
+        height: pointer.y - this.startY,
+        tags: [],
+      };
+
+      return this.createRectangle(canvas, boundingBox);
     },
     addMouseMoveHandler(canvas) {
       canvas.on('mouse:move', (options) => {
@@ -105,35 +126,46 @@ export default {
         this.isMouseDown = false;
       });
     },
+    addDeleteEventHandler(canvas) {
+      eventBus.$on('delete', () => {
+        canvas.remove(canvas.getActiveObject());
+        this.$emit('select', null);
+      });
+    },
+    addSaveEventHandler(canvas) {
+      eventBus.$on('save', ({ id, tags }) => {
+        const activeBoundingBox = canvas.getActiveObject();
+        activeBoundingBox.id = id;
+        activeBoundingBox.tags = [...tags];
+      });
+    },
     constructBoundingBox(rectangle) {
       return {
+        id: rectangle.id,
         top: rectangle.top,
         left: rectangle.left,
         height: rectangle.height,
         width: rectangle.width,
+        tags: rectangle.tags || [],
       };
     },
     drawExistingBoundingBoxes(canvas) {
       this.boundingBoxes.forEach((box) => {
-        this.createRectangle({
-          canvas,
-          top: box.top,
-          left: box.left,
-          width: box.width,
-          height: box.height,
-        });
+        this.createRectangle(canvas, box, true);
       });
 
       canvas.renderAll();
     },
-    createRectangle({
-      canvas, top, left, width, height,
-    }) {
+    createRectangle(canvas, boundingBox) {
+      const tags = boundingBox.tags.map((tag) => ({ id: tag.id, label: tag.label }));
+
       const rectangle = new fabric.Rect({
-        top,
-        left,
-        width,
-        height,
+        id: boundingBox.id,
+        top: boundingBox.top,
+        left: boundingBox.left,
+        width: boundingBox.width,
+        height: boundingBox.height,
+        tags,
         originX: 'left',
         originY: 'top',
         angle: 0,
@@ -142,7 +174,7 @@ export default {
         transparentCorners: false,
       });
 
-      rectangle.stroke = 'red';
+      rectangle.stroke = COLOR.DESELECTED;
       rectangle.strokeWidth = 5;
       rectangle.fill = 'transparent';
 
@@ -154,11 +186,11 @@ export default {
       });
 
       rectangle.on('selected', () => {
-        rectangle.set({ stroke: 'green' });
+        rectangle.set({ stroke: COLOR.SELECTED });
       });
 
       rectangle.on('deselected', () => {
-        rectangle.set({ stroke: 'red' });
+        rectangle.set({ stroke: COLOR.DESELECTED });
       });
 
       return rectangle;

@@ -1,12 +1,44 @@
 <template>
-  <v-row>
-    <v-autocomplete v-model="selectedTag" :items="tags"></v-autocomplete>
-    <v-btn @click="save">Save</v-btn>
-    <v-btn @click="remove">Delete</v-btn>
+  <v-row align="center">
+    <v-col cols="3"></v-col>
+    <v-col cols="6" align="center">
+      <v-combobox
+        v-model="selectedTags"
+        item-text="label"
+        chips
+        clearable
+        multiple
+        return-object
+        label="Select tags or add new ones"
+        placeholder="Press Enter to add"
+        :items="selectableTags"
+        @change="updateSelectableTags"
+      ></v-combobox>
+
+      <v-btn
+        width="80"
+        color="success"
+        class="mr-3"
+        @click="save"
+      >Save</v-btn>
+      <v-btn
+        width="80"
+        color="error"
+        @click="remove"
+      >Delete</v-btn>
+
+    </v-col>
+    <v-col cols="3"></v-col>
   </v-row>
 </template>
 
 <script>
+import eventBus from '@/store/eventBus';
+
+import {
+  deleteBoundingBox, loadTags, createBoundingBox, updateBoundingBox,
+} from '@/api/api';
+
 export default {
   name: 'ImageActions',
   props: {
@@ -17,24 +49,59 @@ export default {
   },
   data() {
     return {
-      tags: [],
-      selectedTag: null,
+      initialTags: [],
+      selectableTags: [],
+      selectedTags: [],
     };
   },
   mounted() {
+    this.initSelectedTags();
     this.loadTags();
   },
+  watch: {
+    box(value) {
+      this.selectedTags = [...value.tags];
+    },
+  },
   methods: {
+    initSelectedTags() {
+      this.selectedTags = [...this.box.tags];
+    },
     async loadTags() {
-      this.tags = await this.$store.dispatch('loadTags');
+      this.initialTags = await loadTags();
+      this.selectableTags = this.initialTags;
     },
-    save() {
-      const payload = { boundingBox: this.box, tag: this.selectedTag };
-      this.$store.dispatch('saveBoundingBox', payload);
+    updateSelectableTags(selectedTags) {
+      this.selectableTags = [...new Set(this.initialTags.concat(selectedTags))];
     },
-    remove() {
-      // TODO: If not already saved, should just remove from canvas?
-      this.$store.dispatch('deleteBoundingBox', this.box);
+    async save() {
+      const tags = this.constructTags();
+      const payload = { ...this.box, tags };
+      const updatedBoundingBox = await this.createOrUpdate(payload);
+      const toastMessage = payload.id ? 'Updated Successfully' : 'Created Successfully';
+
+      this.box.id = updatedBoundingBox.id;
+      this.$emit('toast', toastMessage);
+      eventBus.$emit('save', { id: updatedBoundingBox.id, tags });
+    },
+    constructTags() {
+      return this.selectedTags.map((tag) => {
+        if (typeof tag !== 'object') {
+          return { label: tag };
+        }
+        return tag;
+      });
+    },
+    createOrUpdate(payload) {
+      return payload.id ? updateBoundingBox(payload) : createBoundingBox(payload);
+    },
+    async remove() {
+      if (this.box.id) {
+        await deleteBoundingBox(this.box);
+      }
+
+      this.$emit('toast', 'Deleted Successfully');
+      eventBus.$emit('delete');
     },
   },
 };
